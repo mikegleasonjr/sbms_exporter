@@ -1,0 +1,50 @@
+# HELP sbms_battery_charging Is the battery currently charging or discharging?
+# TYPE sbms_battery_charging gauge
+sbms_battery_charging 0
+# HELP sbms_battery_current Battery current (positive means charging, negative means discharging).
+# TYPE sbms_battery_current gauge
+sbms_battery_current 0.366
+# HELP sbms_battery_soc Battery state of charge (%).
+# TYPE sbms_battery_soc gauge
+sbms_battery_soc 99
+# HELP sbms_battery_voltage battery cell voltage.
+# TYPE sbms_battery_voltage gauge
+sbms_battery_voltage{cell="1"} 3.375
+sbms_battery_voltage{cell="2"} 3.38
+sbms_battery_voltage{cell="3"} 3.381
+sbms_battery_voltage{cell="4"} 3.379
+sbms_battery_voltage{cell="5"} 3.379
+sbms_battery_voltage{cell="6"} 3.378
+sbms_battery_voltage{cell="7"} 3.375
+sbms_battery_voltage{cell="8"} 3.381
+# HELP sbms_device_adc_value Device ADC value.
+# TYPE sbms_device_adc_value gauge
+sbms_device_adc_value{adc="2"} 0
+sbms_device_adc_value{adc="3"} 0
+sbms_device_adc_value{adc="4"} 0
+# HELP sbms_device_external_temperature Device external temperature.
+# TYPE sbms_device_external_temperature gauge
+sbms_device_external_temperature -45
+# HELP sbms_device_heat_value Device heat value.
+# TYPE sbms_device_heat_value gauge
+sbms_device_heat_value{heat="1"} 0
+sbms_device_heat_value{heat="2"} 0
+# HELP sbms_device_internal_temperature Device internal temperature.
+# TYPE sbms_device_internal_temperature gauge
+sbms_device_internal_temperature 24.4
+# HELP sbms_device_status Device status number.
+# TYPE sbms_device_status gauge
+sbms_device_status 20480
+# HELP sbms_external_load_current Load current.
+# TYPE sbms_external_load_current gauge
+sbms_external_load_current 0
+# HELP sbms_photovoltaic_array_current Array current.
+# TYPE sbms_photovoltaic_array_current gauge
+sbms_photovoltaic_array_current{pv="1"} 0
+sbms_photovoltaic_array_current{pv="2"} 0.249
+# HELP sbms_up Was the last scrape of sbms successful.
+# TYPE sbms_up gauge
+sbms_up 1
+# HELP sbms_updated The date the data was last updated (elapsed time since the Unix epoch).
+# TYPE sbms_updated gauge
+sbms_updated 1.4595372e+09
