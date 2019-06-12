@@ -2,6 +2,7 @@ go:
     # Whenever the Go version is updated here, .travis.yml and
     # .circle/config.yml should also be updated.
     version: 1.12
+    cgo: false
 repository:
     path: github.com/mikegleasonjr/sbms_exporter
 build:
