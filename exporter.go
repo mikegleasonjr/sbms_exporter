@@ -15,6 +15,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -145,7 +146,7 @@ func (m *Exporter) Export(r io.Reader) error {
 	defer down()
 
 	for s.Scan() {
-		if err := v.ReadFrom(s.Bytes()); err != nil {
+		if err := v.ReadFrom(bytes.TrimSpace(s.Bytes())); err != nil {
 			down()
 			continue
 		}
