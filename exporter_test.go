@@ -59,6 +59,28 @@ func TestMonitor(t *testing.T) {
 	ensureMetricsEquals(t, reg, `testdata/down.metrics`)
 }
 
+func TestWhitespace(t *testing.T) {
+	reg := prometheus.NewRegistry()
+	exp := NewExporter(reg)
+	wg := sync.WaitGroup{}
+	w, r := net.Pipe()
+
+	wg.Add(1)
+	go func() {
+		err := exp.Export(r)
+		if err != io.EOF {
+			t.Errorf("unexpected error: %q", err)
+		}
+		wg.Done()
+	}()
+
+	receiveData(t, w, `testdata/whitespace.sbms`)
+	ensureMetricsEquals(t, reg, `testdata/whitespace.metrics`)
+
+	w.Close()
+	wg.Wait()
+}
+
 func receiveData(t *testing.T, w io.Writer, sbms string) {
 	t.Helper()
 
