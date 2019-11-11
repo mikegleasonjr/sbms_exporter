@@ -81,6 +81,10 @@ func (v *Values) ReadFrom(b []byte) error {
 	v.Heat2 = v.unpackBase91(b, 53, 3)
 	v.Status = v.unpackBase91(b, 56, 3)
 
+	if !v.Charging {
+		v.BatteryCurrent = -v.BatteryCurrent
+	}
+
 	return nil
 }
 

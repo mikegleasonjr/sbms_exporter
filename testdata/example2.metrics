@@ -3,7 +3,7 @@
 sbms_battery_charging 0
 # HELP sbms_battery_current Battery current (positive means charging, negative means discharging).
 # TYPE sbms_battery_current gauge
-sbms_battery_current 0.366
+sbms_battery_current -0.366
 # HELP sbms_battery_soc Battery state of charge (%).
 # TYPE sbms_battery_soc gauge
 sbms_battery_soc 99
