@@ -23,21 +23,28 @@ import (
 
 // Exporter TODO
 type Exporter struct {
-	registry        prometheus.Registerer
-	registered      bool
-	up              prometheus.Gauge
-	updated         prometheus.Gauge
-	batterySOC      prometheus.Gauge
-	batteryCharging prometheus.Gauge
-	batteryCurrent  prometheus.Gauge
-	cellVoltage     *prometheus.GaugeVec
-	pvCurrent       *prometheus.GaugeVec
-	loadCurrent     prometheus.Gauge
-	tempInternal    prometheus.Gauge
-	tempExternal    prometheus.Gauge
-	adc             *prometheus.GaugeVec
-	heat            *prometheus.GaugeVec
-	status          prometheus.Gauge
+	registry          prometheus.Registerer
+	registered        bool
+	up                prometheus.Gauge
+	updated           prometheus.Gauge
+	status            prometheus.Gauge
+	batteryCharging   prometheus.Gauge
+	batterySOC        prometheus.Gauge
+	batteryVolts      prometheus.Gauge
+	batteryAmperes    prometheus.Gauge
+	batteryWatts      prometheus.Gauge
+	cellVolts         *prometheus.GaugeVec
+	pvVolts           prometheus.Gauge
+	pvAmperes         *prometheus.GaugeVec
+	pvWatts           *prometheus.GaugeVec
+	pvAmperesCombined prometheus.Gauge
+	pvWattsCombined   prometheus.Gauge
+	thermistorCelsius *prometheus.GaugeVec
+	adcValues         *prometheus.GaugeVec
+	heatValues        *prometheus.GaugeVec
+	extLoadVolts      prometheus.Gauge
+	extLoadAmperes    prometheus.Gauge
+	extLoadWatts      prometheus.Gauge
 }
 
 // NewExporter TODO
@@ -52,14 +59,15 @@ func NewExporter(registry prometheus.Registerer) *Exporter {
 		}),
 		updated: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Name:      "updated",
-			Help:      "The date the data was last updated (elapsed time since the Unix epoch).",
+			Subsystem: "updated",
+			Name:      "unix",
+			Help:      "The unix date the data was last updated (number of seconds elapsed since January 1, 1970 UTC).",
 		}),
-		batterySOC: prometheus.NewGauge(prometheus.GaugeOpts{
+		status: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "battery",
-			Name:      "soc",
-			Help:      "Battery state of charge (%).",
+			Subsystem: "device",
+			Name:      "status",
+			Help:      "Device status number.",
 		}),
 		batteryCharging: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
@@ -67,59 +75,101 @@ func NewExporter(registry prometheus.Registerer) *Exporter {
 			Name:      "charging",
 			Help:      "Is the battery currently charging or discharging?",
 		}),
-		batteryCurrent: prometheus.NewGauge(prometheus.GaugeOpts{
+		batterySOC: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
 			Subsystem: "battery",
-			Name:      "current",
+			Name:      "soc",
+			Help:      "Battery state of charge (%).",
+		}),
+		batteryVolts: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "battery",
+			Name:      "volts",
+			Help:      "Battery voltage.",
+		}),
+		batteryAmperes: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "battery",
+			Name:      "amperes",
 			Help:      "Battery current (positive means charging, negative means discharging).",
 		}),
-		cellVoltage: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		batteryWatts: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
 			Subsystem: "battery",
-			Name:      "voltage",
-			Help:      "battery cell voltage.",
-		}, []string{"cell"}),
-		pvCurrent: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name:      "watts",
+			Help:      "Battery power (positive means charging, negative means discharging).",
+		}),
+		cellVolts: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "photovoltaic_array",
-			Name:      "current",
+			Subsystem: "cell",
+			Name:      "volts",
+			Help:      "Battery cell voltage.",
+		}, []string{"cell"}),
+		pvVolts: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "pv",
+			Name:      "volts",
+			Help:      "Array voltage.",
+		}),
+		pvAmperes: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "pv",
+			Name:      "amperes",
 			Help:      "Array current.",
 		}, []string{"pv"}),
-		loadCurrent: prometheus.NewGauge(prometheus.GaugeOpts{
+		pvWatts: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "external_load",
-			Name:      "current",
-			Help:      "Load current.",
+			Subsystem: "pv",
+			Name:      "watts",
+			Help:      "Array power.",
+		}, []string{"pv"}),
+		pvAmperesCombined: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "pv",
+			Name:      "amperes_combined",
+			Help:      "Arrays total current.",
 		}),
-		tempInternal: prometheus.NewGauge(prometheus.GaugeOpts{
+		pvWattsCombined: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "device",
-			Name:      "internal_temperature",
-			Help:      "Device internal temperature.",
+			Subsystem: "pv",
+			Name:      "watts_combined",
+			Help:      "Arrays total power.",
 		}),
-		tempExternal: prometheus.NewGauge(prometheus.GaugeOpts{
+		thermistorCelsius: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "device",
-			Name:      "external_temperature",
-			Help:      "Device external temperature.",
-		}),
-		adc: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Subsystem: "thermistor",
+			Name:      "celsius",
+			Help:      "Device thermistor temperature.",
+		}, []string{"sensor"}),
+		adcValues: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "device",
-			Name:      "adc_value",
+			Subsystem: "adc",
+			Name:      "values",
 			Help:      "Device ADC value.",
 		}, []string{"adc"}),
-		heat: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		heatValues: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "device",
-			Name:      "heat_value",
+			Subsystem: "heat",
+			Name:      "values",
 			Help:      "Device heat value.",
 		}, []string{"heat"}),
-		status: prometheus.NewGauge(prometheus.GaugeOpts{
+		extLoadVolts: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "sbms",
-			Subsystem: "device",
-			Name:      "status",
-			Help:      "Device status number.",
+			Subsystem: "external_load",
+			Name:      "volts",
+			Help:      "External load voltage.",
+		}),
+		extLoadAmperes: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "external_load",
+			Name:      "amperes",
+			Help:      "External load current.",
+		}),
+		extLoadWatts: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: "sbms",
+			Subsystem: "external_load",
+			Name:      "watts",
+			Help:      "External load power.",
 		}),
 	}
 
@@ -151,30 +201,42 @@ func (m *Exporter) Export(r io.Reader) error {
 			continue
 		}
 
-		m.updated.Set(float64(v.Date.UnixNano()) / 1e9)
-		m.batterySOC.Set(float64(v.StateOfCharge))
-		m.batteryCharging.Set(boolAsFloat(v.Charging))
-		m.batteryCurrent.Set(v.BatteryCurrent)
-		m.cellVoltage.With(prometheus.Labels{"cell": "1"}).Set(v.Cell1Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "2"}).Set(v.Cell2Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "3"}).Set(v.Cell3Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "4"}).Set(v.Cell4Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "5"}).Set(v.Cell5Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "6"}).Set(v.Cell6Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "7"}).Set(v.Cell7Voltage)
-		m.cellVoltage.With(prometheus.Labels{"cell": "8"}).Set(v.Cell8Voltage)
-		m.pvCurrent.With(prometheus.Labels{"pv": "1"}).Set(v.PV1Current)
-		m.pvCurrent.With(prometheus.Labels{"pv": "2"}).Set(v.PV2Current)
-		m.loadCurrent.Set(v.ExtLoadCurrent)
-		m.tempInternal.Set(v.InternalTemp)
-		m.tempExternal.Set(v.ExternalTemp)
-		m.adc.With(prometheus.Labels{"adc": "2"}).Set(float64(v.ADC2))
-		m.adc.With(prometheus.Labels{"adc": "3"}).Set(float64(v.ADC3))
-		m.adc.With(prometheus.Labels{"adc": "4"}).Set(float64(v.ADC4))
-		m.heat.With(prometheus.Labels{"heat": "1"}).Set(float64(v.Heat1))
-		m.heat.With(prometheus.Labels{"heat": "2"}).Set(float64(v.Heat2))
-		m.status.Set(float64(v.Status))
+		battVolts := v.Cell1Voltage + v.Cell2Voltage + v.Cell3Voltage + v.Cell4Voltage + v.Cell5Voltage + v.Cell6Voltage + v.Cell7Voltage + v.Cell8Voltage
+
 		up()
+
+		m.updated.Set(float64(v.Date.Unix()))
+		m.status.Set(float64(v.Status))
+		m.batteryCharging.Set(boolAsFloat(v.Charging))
+		m.batterySOC.Set(float64(v.StateOfCharge))
+		m.batteryVolts.Set(battVolts)
+		m.batteryAmperes.Set(v.BatteryCurrent)
+		m.batteryWatts.Set(v.BatteryCurrent * battVolts)
+		m.cellVolts.With(prometheus.Labels{"cell": "1"}).Set(v.Cell1Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "2"}).Set(v.Cell2Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "3"}).Set(v.Cell3Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "4"}).Set(v.Cell4Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "5"}).Set(v.Cell5Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "6"}).Set(v.Cell6Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "7"}).Set(v.Cell7Voltage)
+		m.cellVolts.With(prometheus.Labels{"cell": "8"}).Set(v.Cell8Voltage)
+		m.pvVolts.Set(battVolts)
+		m.pvAmperes.With(prometheus.Labels{"pv": "1"}).Set(v.PV1Current)
+		m.pvAmperes.With(prometheus.Labels{"pv": "2"}).Set(v.PV2Current)
+		m.pvWatts.With(prometheus.Labels{"pv": "1"}).Set(v.PV1Current * battVolts)
+		m.pvWatts.With(prometheus.Labels{"pv": "2"}).Set(v.PV2Current * battVolts)
+		m.pvAmperesCombined.Set(v.PV1Current + v.PV2Current)
+		m.pvWattsCombined.Set(v.PV1Current*battVolts + v.PV2Current*battVolts)
+		m.thermistorCelsius.With(prometheus.Labels{"sensor": "internal"}).Set(v.InternalTemp)
+		m.thermistorCelsius.With(prometheus.Labels{"sensor": "external"}).Set(v.ExternalTemp)
+		m.adcValues.With(prometheus.Labels{"adc": "2"}).Set(float64(v.ADC2))
+		m.adcValues.With(prometheus.Labels{"adc": "3"}).Set(float64(v.ADC3))
+		m.adcValues.With(prometheus.Labels{"adc": "4"}).Set(float64(v.ADC4))
+		m.heatValues.With(prometheus.Labels{"heat": "1"}).Set(float64(v.Heat1))
+		m.heatValues.With(prometheus.Labels{"heat": "2"}).Set(float64(v.Heat2))
+		m.extLoadVolts.Set(battVolts)
+		m.extLoadAmperes.Set(v.ExtLoadCurrent)
+		m.extLoadWatts.Set(v.ExtLoadCurrent * battVolts)
 	}
 
 	if s.Err() != nil {
@@ -189,17 +251,24 @@ func (m *Exporter) ensureExporterRegistered() {
 		return
 	}
 	m.registry.MustRegister(m.updated)
-	m.registry.MustRegister(m.batterySOC)
-	m.registry.MustRegister(m.batteryCharging)
-	m.registry.MustRegister(m.batteryCurrent)
-	m.registry.MustRegister(m.cellVoltage)
-	m.registry.MustRegister(m.pvCurrent)
-	m.registry.MustRegister(m.loadCurrent)
-	m.registry.MustRegister(m.tempInternal)
-	m.registry.MustRegister(m.tempExternal)
-	m.registry.MustRegister(m.adc)
-	m.registry.MustRegister(m.heat)
 	m.registry.MustRegister(m.status)
+	m.registry.MustRegister(m.batteryCharging)
+	m.registry.MustRegister(m.batterySOC)
+	m.registry.MustRegister(m.batteryVolts)
+	m.registry.MustRegister(m.batteryAmperes)
+	m.registry.MustRegister(m.batteryWatts)
+	m.registry.MustRegister(m.cellVolts)
+	m.registry.MustRegister(m.pvVolts)
+	m.registry.MustRegister(m.pvAmperes)
+	m.registry.MustRegister(m.pvWatts)
+	m.registry.MustRegister(m.pvAmperesCombined)
+	m.registry.MustRegister(m.pvWattsCombined)
+	m.registry.MustRegister(m.thermistorCelsius)
+	m.registry.MustRegister(m.adcValues)
+	m.registry.MustRegister(m.heatValues)
+	m.registry.MustRegister(m.extLoadVolts)
+	m.registry.MustRegister(m.extLoadAmperes)
+	m.registry.MustRegister(m.extLoadWatts)
 	m.registered = true
 }
 
@@ -208,17 +277,24 @@ func (m *Exporter) ensureExporterCleared() {
 		return
 	}
 	m.registry.Unregister(m.updated)
-	m.registry.Unregister(m.batterySOC)
-	m.registry.Unregister(m.batteryCharging)
-	m.registry.Unregister(m.batteryCurrent)
-	m.registry.Unregister(m.cellVoltage)
-	m.registry.Unregister(m.pvCurrent)
-	m.registry.Unregister(m.loadCurrent)
-	m.registry.Unregister(m.tempInternal)
-	m.registry.Unregister(m.tempExternal)
-	m.registry.Unregister(m.adc)
-	m.registry.Unregister(m.heat)
 	m.registry.Unregister(m.status)
+	m.registry.Unregister(m.batteryCharging)
+	m.registry.Unregister(m.batterySOC)
+	m.registry.Unregister(m.batteryVolts)
+	m.registry.Unregister(m.batteryAmperes)
+	m.registry.Unregister(m.batteryWatts)
+	m.registry.Unregister(m.cellVolts)
+	m.registry.Unregister(m.pvVolts)
+	m.registry.Unregister(m.pvAmperes)
+	m.registry.Unregister(m.pvWatts)
+	m.registry.Unregister(m.pvAmperesCombined)
+	m.registry.Unregister(m.pvWattsCombined)
+	m.registry.Unregister(m.thermistorCelsius)
+	m.registry.Unregister(m.adcValues)
+	m.registry.Unregister(m.heatValues)
+	m.registry.Unregister(m.extLoadVolts)
+	m.registry.Unregister(m.extLoadAmperes)
+	m.registry.Unregister(m.extLoadWatts)
 	m.registered = false
 }
 

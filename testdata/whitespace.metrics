@@ -1,50 +1,73 @@
+# HELP sbms_adc_values Device ADC value.
+# TYPE sbms_adc_values gauge
+sbms_adc_values{adc="2"} 0
+sbms_adc_values{adc="3"} 0
+sbms_adc_values{adc="4"} 0
+# HELP sbms_battery_amperes Battery current (positive means charging, negative means discharging).
+# TYPE sbms_battery_amperes gauge
+sbms_battery_amperes -0.366
 # HELP sbms_battery_charging Is the battery currently charging or discharging?
 # TYPE sbms_battery_charging gauge
 sbms_battery_charging 0
-# HELP sbms_battery_current Battery current (positive means charging, negative means discharging).
-# TYPE sbms_battery_current gauge
-sbms_battery_current -0.366
 # HELP sbms_battery_soc Battery state of charge (%).
 # TYPE sbms_battery_soc gauge
 sbms_battery_soc 99
-# HELP sbms_battery_voltage battery cell voltage.
-# TYPE sbms_battery_voltage gauge
-sbms_battery_voltage{cell="1"} 3.375
-sbms_battery_voltage{cell="2"} 3.38
-sbms_battery_voltage{cell="3"} 3.381
-sbms_battery_voltage{cell="4"} 3.379
-sbms_battery_voltage{cell="5"} 3.379
-sbms_battery_voltage{cell="6"} 3.378
-sbms_battery_voltage{cell="7"} 3.375
-sbms_battery_voltage{cell="8"} 3.381
-# HELP sbms_device_adc_value Device ADC value.
-# TYPE sbms_device_adc_value gauge
-sbms_device_adc_value{adc="2"} 0
-sbms_device_adc_value{adc="3"} 0
-sbms_device_adc_value{adc="4"} 0
-# HELP sbms_device_external_temperature Device external temperature.
-# TYPE sbms_device_external_temperature gauge
-sbms_device_external_temperature -45
-# HELP sbms_device_heat_value Device heat value.
-# TYPE sbms_device_heat_value gauge
-sbms_device_heat_value{heat="1"} 0
-sbms_device_heat_value{heat="2"} 0
-# HELP sbms_device_internal_temperature Device internal temperature.
-# TYPE sbms_device_internal_temperature gauge
-sbms_device_internal_temperature 24.4
+# HELP sbms_battery_volts Battery voltage.
+# TYPE sbms_battery_volts gauge
+sbms_battery_volts 27.028
+# HELP sbms_battery_watts Battery power (positive means charging, negative means discharging).
+# TYPE sbms_battery_watts gauge
+sbms_battery_watts -9.892247999999999
+# HELP sbms_cell_volts Battery cell voltage.
+# TYPE sbms_cell_volts gauge
+sbms_cell_volts{cell="1"} 3.375
+sbms_cell_volts{cell="2"} 3.38
+sbms_cell_volts{cell="3"} 3.381
+sbms_cell_volts{cell="4"} 3.379
+sbms_cell_volts{cell="5"} 3.379
+sbms_cell_volts{cell="6"} 3.378
+sbms_cell_volts{cell="7"} 3.375
+sbms_cell_volts{cell="8"} 3.381
 # HELP sbms_device_status Device status number.
 # TYPE sbms_device_status gauge
 sbms_device_status 20480
-# HELP sbms_external_load_current Load current.
-# TYPE sbms_external_load_current gauge
-sbms_external_load_current 0
-# HELP sbms_photovoltaic_array_current Array current.
-# TYPE sbms_photovoltaic_array_current gauge
-sbms_photovoltaic_array_current{pv="1"} 0
-sbms_photovoltaic_array_current{pv="2"} 0.249
+# HELP sbms_external_load_amperes External load current.
+# TYPE sbms_external_load_amperes gauge
+sbms_external_load_amperes 0
+# HELP sbms_external_load_volts External load voltage.
+# TYPE sbms_external_load_volts gauge
+sbms_external_load_volts 27.028
+# HELP sbms_external_load_watts External load power.
+# TYPE sbms_external_load_watts gauge
+sbms_external_load_watts 0
+# HELP sbms_heat_values Device heat value.
+# TYPE sbms_heat_values gauge
+sbms_heat_values{heat="1"} 0
+sbms_heat_values{heat="2"} 0
+# HELP sbms_pv_amperes Array current.
+# TYPE sbms_pv_amperes gauge
+sbms_pv_amperes{pv="1"} 0
+sbms_pv_amperes{pv="2"} 0.249
+# HELP sbms_pv_amperes_combined Arrays total current.
+# TYPE sbms_pv_amperes_combined gauge
+sbms_pv_amperes_combined 0.249
+# HELP sbms_pv_volts Array voltage.
+# TYPE sbms_pv_volts gauge
+sbms_pv_volts 27.028
+# HELP sbms_pv_watts Array power.
+# TYPE sbms_pv_watts gauge
+sbms_pv_watts{pv="1"} 0
+sbms_pv_watts{pv="2"} 6.729972
+# HELP sbms_pv_watts_combined Arrays total power.
+# TYPE sbms_pv_watts_combined gauge
+sbms_pv_watts_combined 6.729972
+# HELP sbms_thermistor_celsius Device thermistor temperature.
+# TYPE sbms_thermistor_celsius gauge
+sbms_thermistor_celsius{sensor="external"} -45
+sbms_thermistor_celsius{sensor="internal"} 24.4
 # HELP sbms_up Was the last scrape of sbms successful.
 # TYPE sbms_up gauge
 sbms_up 1
-# HELP sbms_updated The date the data was last updated (elapsed time since the Unix epoch).
-# TYPE sbms_updated gauge
-sbms_updated 1.4595372e+09
+# HELP sbms_updated_unix The unix date the data was last updated (number of seconds elapsed since January 1, 1970 UTC).
+# TYPE sbms_updated_unix gauge
+sbms_updated_unix 1.4595372e+09
